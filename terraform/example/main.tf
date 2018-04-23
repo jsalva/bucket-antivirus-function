@@ -56,7 +56,7 @@ resource "aws_iam_role" "lambda_antivirus" {
 }
 
 resource "aws_lambda_function" "s3_antivirus_scan" {
-    filename = "${path.module}/../../build/lambda_antivirus.zip"
+    filename = "${path.module}/build/lambda.zip"
     function_name = "s3_antivirus_scan_${var.environment}"
     role = "${aws_iam_role.lambda_antivirus.arn}"
     handler = "scan.lambda_handler"
@@ -80,7 +80,7 @@ resource "aws_lambda_permission" "allow_trigger_antivirus_from_s3" {
 }
 
 resource "aws_lambda_function" "s3_antivirus_update" {
-    filename = "${path.module}/files/lambda_antivirus.zip"
+    filename = "${path.module}/build/lambda.zip"
     function_name = "s3_antivirus_update_${var.environment}"
     role = "${aws_iam_role.lambda_antivirus.arn}"
     handler = "update.lambda_handler"
@@ -120,12 +120,12 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_lambda_s3_antivirus_u
 }
 
 resource "aws_s3_bucket" "s3_antivirus_definitions" {
-  bucket = "s3_antivirus_definitions_${var.environment}"
+  bucket = "s3-antivirus-definitions-${var.environment}"
   acl    = "private"
 }
 
 resource "aws_s3_bucket" "s3_antivirus_testing" {
-  bucket = "s3_antivirus_testing_${var.environment}"
+  bucket = "s3-antivirus-testing-${var.environment}"
   acl    = "private"
 }
 

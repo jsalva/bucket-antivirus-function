@@ -5,6 +5,7 @@ ENVIRONMENT ?= staging
 
 current_dir := $(shell pwd)
 container_dir := /opt/app
+build_dir := $(current_dir)/../../build
 
 archive:
 	make -C ../../ archive
@@ -30,6 +31,7 @@ plan: init archive
 	        plan -var environment=$(ENVIRONMENT)
 apply: init archive
 	docker run --rm -ti \
+		-v $(build_dir):$(container_dir)/build \
 		-v $(current_dir):$(container_dir) \
 		-e ENVIRONMENT=$(ENVIRONMENT) \
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
