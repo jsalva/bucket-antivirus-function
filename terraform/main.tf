@@ -72,11 +72,12 @@ resource "aws_lambda_function" "s3_antivirus_scan" {
 }
 
 resource "aws_lambda_permission" "allow_trigger_antivirus_from_s3" {
-    statement_id = "AllowExecutionFromS3Bucket"
+    statement_id = "AllowExecutionFromS3Bucket-${element(var.scanned_s3_buckets_list, count.index)}"
     action = "lambda:InvokeFunction"
     function_name = "${aws_lambda_function.s3_antivirus_scan.arn}"
     principal = "s3.amazonaws.com"
-    source_arn = "${aws_s3_bucket.s3_antivirus_testing.arn}"
+    count = "${length(var.scanned_s3_buckets_list)}"
+    source_arn = "arn:aws:s3:::${element(var.scanned_s3_buckets_list, count.index)}"
 }
 
 resource "aws_lambda_function" "s3_antivirus_update" {
@@ -124,20 +125,15 @@ resource "aws_s3_bucket" "s3_antivirus_definitions" {
   acl    = "private"
 }
 
-resource "aws_s3_bucket" "s3_antivirus_testing" {
-  bucket = "s3-antivirus-testing-${var.environment}"
-  acl    = "private"
-}
-
 resource "aws_s3_bucket_notification" "antivirus_scan" {
-  bucket = "${aws_s3_bucket.s3_antivirus_testing.id}"
+  count = "${length(var.scanned_s3_buckets_list)}"
+  bucket = "${element(var.scanned_s3_buckets_list, count.index)}"
 
   lambda_function {
     lambda_function_arn = "${aws_lambda_function.s3_antivirus_scan.arn}"
     events = ["s3:ObjectCreated:*"]
   }
 }
-
 
 resource "aws_sns_topic" "s3_antivirus_updates" {
   name = "s3-antivirus-updates-${var.environment}"
